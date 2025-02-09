@@ -1,4 +1,4 @@
- FROM kalilinux/kali-rolling:latest
+FROM ubuntu
 
 LABEL maintainer="Matt McNamee"
 
@@ -386,5 +386,5 @@ RUN cd $HOME && find . -name '.git' -type d -exec rm -rf {} + && \
 # ------------------------------
 
 # Start up commands
-ENTRYPOINT ["bash", "/startup.sh"]
+ENTRYPOINT ["bash", "/docker-to-bash.sh"]
 CMD ["/bin/zsh"]
