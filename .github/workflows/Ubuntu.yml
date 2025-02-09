@@ -2,7 +2,9 @@ name: Ubuntu
 on: workflow_dispatch
 jobs:
   system:
-    runs-on: ubuntu-latest
+    runs-on: kalilinux/kali-rolling
+
+ARG DEBIAN_FRONTEND=noninteractive
     steps:
       - uses: actions/checkout@v3
       - name: Updating & Cleaning ..
