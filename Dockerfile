@@ -1,4 +1,7 @@
-FROM ubuntu-latest
+FROM kalilinux/kali-rolling:latest AS base
+LABEL maintainer="Artis3n <dev@artis3nal.com>"
+
+ARG DEBIAN_FRONTEND=noninteractive
 
 LABEL maintainer="Matt McNamee"
 
