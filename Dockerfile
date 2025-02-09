@@ -1,4 +1,4 @@
-FROM ubuntu
+ FROM kalilinux/kali-rolling:latest
 
 LABEL maintainer="Matt McNamee"
 
