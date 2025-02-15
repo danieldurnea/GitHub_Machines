@@ -8,7 +8,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
       - name: Run SSH4Me Action
         uses: Jisan09/SSH4Me@main
         env:
