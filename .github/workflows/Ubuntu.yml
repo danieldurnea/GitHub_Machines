@@ -1,16 +1,38 @@
-name: 'Run SSH4Me'
-on:
-  workflow_dispatch:
-
 jobs:
-  build-and-run:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: Jisan09/SSH4Me@main
-        env:
-          AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-           uses: type=image,name=target
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3.7.0
+        with:
+          cosign-release: 'v2.4.1'
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3.2.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5.5.1
+        with:
+          images: quay.io/ydrag0n/pterodactyl-vps-egg
+          
+      - name: Build and push
+        id: build-and-push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64,linux/riscv64
+          push: true
+          tags: quay.io/ydrag0n/pterodactyl-vps-egg:latest,quay.io/ydrag0n/pterodactyl-vps-egg:${{ github.ref_name }}
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,name=target
           cache-from: type=gha
           cache-to: type=gha,mode=max
