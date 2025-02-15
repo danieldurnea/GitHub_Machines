@@ -2,7 +2,6 @@ name: Ubuntu
 on: workflow_dispatch
 jobs:
   system:
-    runs-on: kalilinux/kali-rolling
 
 ARG DEBIAN_FRONTEND=noninteractive
     steps:
