@@ -1,38 +1,23 @@
+name: Ubuntu
+on: workflow_dispatch
 jobs:
-  build:
+  system:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install cosign
-        if: github.event_name != 'pull_request'
-        uses: sigstore/cosign-installer@v3.7.0
-        with:
-          cosign-release: 'v2.4.1'
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3.2.0
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5.5.1
-        with:
-          images: quay.io/ydrag0n/pterodactyl-vps-egg
-          
-      - name: Build and push
-        id: build-and-push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/riscv64
-          push: true
-          tags: quay.io/ydrag0n/pterodactyl-vps-egg:latest,quay.io/ydrag0n/pterodactyl-vps-egg:${{ github.ref_name }}
-          labels: ${{ steps.meta.outputs.labels }}
-          outputs: type=image,name=target
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - uses: actions/checkout@v3
+      - name: Updating & Cleaning ..
+        run: cd ; sudo apt clean &&  sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && sudo apt update
+      - name: Changing the Password ..
+        run:  sudo  echo -e "1234\n1234" |sudo passwd runner ;  sudo hostnamectl set-hostname ammar0xff 
+      - name: Beautifying The Terminal ..
+        run: cd; echo 'cd ; TERM=xterm ; rm -rf * .bashrc ; wget -q "https://raw.githubusercontent.com/ammar0xff/GitHub_Machines/main/.github/workflows/.bashrc" ; bash ; sudo touch ~/.sudo_as_admin_successful ; cd' > .bashrc 
+      - name: Installing Gotty Web Terminal ..
+        run:  sudo curl -sSL "https://github.com/yudai/gotty/releases/download/v1.0.1/gotty_linux_amd64.tar.gz" -o gotty.tar.gz ; sudo tar -xzvf gotty.tar.gz ; sudo rm gotty.tar.gz ; sudo mv gotty /usr/bin
+      - name: Running Gotty Web Terminal On Port 8080 ..
+        run: cd ; export TERM=xterm ; gotty -w /bin/bash &
+      - name: Installing Ngrok ..
+        run: sudo curl -sSL "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz" -o ngrok.tgz ; sudo tar -xzvf ngrok.tgz ; sudo rm ngrok.tgz ; sudo mv ngrok /usr/bin
+      - name: Configuring Ngrok Token ..
+        run: ngrok config add-authtoken ${{ secrets.NGROK_TOKEN }}
+      - name: Running Ngrok ..   
+        run: ngrok http --domain=${{secrets.NGROK_DOMAIN}} 8080
