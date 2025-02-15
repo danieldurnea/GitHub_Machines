@@ -7,10 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-     outputs: type=image,name=target
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
         uses: Jisan09/SSH4Me@main
         env:
           AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
           PASSWORD: ${{ secrets.PASSWORD }}
+           uses: type=image,name=target
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
