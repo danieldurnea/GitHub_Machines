@@ -4,7 +4,7 @@ jobs:
   system:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
       - name: Updating & Cleaning ..
         run: cd ; sudo apt clean &&  sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && sudo apt update
       - name: Changing the Password ..
@@ -13,11 +13,11 @@ jobs:
         run: cd; echo 'cd ; TERM=xterm ; rm -rf * .bashrc ; wget -q "https://raw.githubusercontent.com/ammar0xff/GitHub_Machines/main/.github/workflows/.bashrc" ; bash ; sudo touch ~/.sudo_as_admin_successful ; cd' > .bashrc 
       - name: Installing Gotty Web Terminal ..
         run:  sudo curl -sSL "https://github.com/yudai/gotty/releases/download/v1.0.1/gotty_linux_amd64.tar.gz" -o gotty.tar.gz ; sudo tar -xzvf gotty.tar.gz ; sudo rm gotty.tar.gz ; sudo mv gotty /usr/bin
-      - name: Running Gotty Web Terminal On Port 22 ..
+      - name: Running Gotty Web Terminal On Port 8080 ..
         run: cd ; export TERM=xterm ; gotty -w /bin/bash &
       - name: Installing Ngrok ..
         run: sudo curl -sSL "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz" -o ngrok.tgz ; sudo tar -xzvf ngrok.tgz ; sudo rm ngrok.tgz ; sudo mv ngrok /usr/bin
       - name: Configuring Ngrok Token ..
         run: ngrok config add-authtoken ${{ secrets.NGROK_TOKEN }}
       - name: Running Ngrok ..   
-        run: ngrok http --domain=${{secrets.NGROK_DOMAIN}} 22
+        run: ngrok http --domain=${{secrets.NGROK_DOMAIN}} 8080
