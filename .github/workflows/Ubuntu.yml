@@ -16,7 +16,4 @@ jobs:
           PASSWORD: ${{ secrets.PASSWORD }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - name: Configuring Ngrok Token ..
-        run: ngrok config add-authtoken ${{ secrets.NGROK_TOKEN }}
-      - name: Running Ngrok ..   
-        run: ngrok http --domain=${{secrets.NGROK_DOMAIN}} 22
+     
