@@ -1,0 +1,26 @@
+name: 'SSH4Me'
+author: 'jisan09'
+description: 'Build SSH tunnel using ngrok over workflow'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Set up Docker'
+      shell: bash
+      run: |
+        curl -fsSL https://get.docker.com -o get-docker.sh
+        sudo sh get-docker.sh
+    - name: 'Build Docker image'
+      shell: bash
+      run: |
+        docker build -t ssh4me --build-arg AUTH_TOKEN=$AUTH_TOKEN --build-arg PASSWORD=$PASSWORD .
+      
+    - name: 'Run Docker container'
+      shell: bash
+      run: docker run docker.io/library/ssh4me
+       push: true
+          cache-from: type=registry,ref=${{ env.ECR_FULL_REPO }}:dockercache
+          cache-to: type=registry,ref=${{ env.ECR_FULL_REPO }}:dockercache,mode=max,image-manifest=true
+branding:
+  icon: 'terminal'
+  color: 'gray-dark'
