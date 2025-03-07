@@ -1,16 +1,21 @@
-name: Ubuntu
-on: workflow_dispatch
+name: 'Run SSH4Me'
+on:
+  workflow_dispatch:
+
 jobs:
-  system:
+  build-and-run:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Updating & Cleaning ..
-        run: cd ; sudo apt clean &&  sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && sudo apt update
-      - name: Changing the Password ..
-        run:  sudo  echo -e "1234\n1234" |sudo passwd runner ;  sudo hostnamectl set-hostname ammar0xff 
-      - name: Installing Ngrok ..
-        run: sudo curl -sSL "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz" -o ngrok.tgz ; sudo tar -xzvf ngrok.tgz ; sudo rm ngrok.tgz ; sudo mv ngrok /usr/bin
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run SSH4Me Action
+        uses: Jisan09/SSH4Me@main
+        env:
+          AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       - name: Configuring Ngrok Token ..
         run: ngrok config add-authtoken ${{ secrets.NGROK_TOKEN }}
       - name: Running Ngrok ..   
