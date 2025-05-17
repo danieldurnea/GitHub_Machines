@@ -7,7 +7,7 @@ on:
       os:
         description: 'Leave only desired OS in the field'
         required: true
-        default: 'windows-2016 | windows-2019 | ubuntu-16.04 | ubuntu-18.04 | ubuntu-20.04 | macos-10.15 | macos-11.0'
+        default: ubuntu-latest
 
 jobs:
   start_ssh_session:
