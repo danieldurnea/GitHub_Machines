@@ -1,17 +1,21 @@
-name: Ubuntu
-on: workflow_dispatch
+---
+name: Dispatch a SSH session
+
+on:
+  workflow_dispatch:
+    inputs:
+      os:
+        description: 'Leave only desired OS in the field'
+        required: true
+        default: 'windows-2016 | windows-2019 | ubuntu-16.04 | ubuntu-18.04 | ubuntu-20.04 | macos-10.15 | macos-11.0'
+
 jobs:
-  system:
-    runs-on: ubuntu-latest
+  start_ssh_session:
+    runs-on: ${{ github.event.inputs.os }}
+    name: Start the SSH session
     steps:
-      - uses: actions/checkout@v4
-      - name: Updating & Cleaning ..
-        run: cd ; sudo apt clean &&  sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && sudo apt update
-      - name: Changing the Password ..
-        run:  sudo  echo -e "1234\n1234" |sudo passwd runner ;  sudo hostnamectl set-hostname ammar0xff 
-      - name: Installing Ngrok ..
-        run: sudo curl -sSL "https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3.5-stable-linux-amd64.tgz" -o ngrok.tgz ; sudo tar -xzvf ngrok.tgz ; sudo rm ngrok.tgz ; sudo mv ngrok /usr/bin
-      - name: Configuring Ngrok Token ..
-        run: ngrok config add-authtoken ${{ secrets.NGROK_TOKEN }}
-      - name: Running Ngrok ..   
-        run: ngrok http --domain=${{secrets.NGROK_DOMAIN}} 22
+    - name: Start SSH session
+      uses: luchihoratiu/debug-via-ssh@main
+      with:
+        NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+        SSH_PASS: ${{ secrets.SSH_PASS }}
