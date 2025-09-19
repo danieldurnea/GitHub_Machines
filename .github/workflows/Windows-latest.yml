@@ -22,7 +22,6 @@ jobs:
     - name: Create Tunnel
       run: .\ngrok\ngrok.exe tcp 3389
       - name: Setup RAM Disk
-      uses: chad-golden/setup-ramdisk@v1
       with:
       size-in-mb: 2048    
     copy-workspace: true
