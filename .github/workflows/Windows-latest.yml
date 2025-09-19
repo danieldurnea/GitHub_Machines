@@ -21,7 +21,9 @@ jobs:
     - run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
     - name: Create Tunnel
       run: .\ngrok\ngrok.exe tcp 3389
-      - name: Setup RAM Disk
-      with:
-      size-in-mb: 2048    
-    copy-workspace: true
+      runs-on: actuated-arm64-8cpu-32gb 
+ strategy: 
+   fail-fast: false 
+   matrix: 
+     target: 
+       - linux-arm64-e2e 
