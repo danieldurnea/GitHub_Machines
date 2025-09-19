@@ -21,4 +21,90 @@ jobs:
     - run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
     - name: Create Tunnel
       run: .\ngrok\ngrok.exe tcp 3389
-      
+      name: Rector, Pint & Tests
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+      - uses: actions/checkout@v3
+        with:
+          # Must be used to trigger workflow after push
+          token: ${{ secrets.ACCESS_TOKEN }}
+      - name: Cache Vendor
+        id: cache-vendor
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-vendor-${{ hashFiles('**/composer.lock') }}
+      - name: "Install Dependencies"
+        if: steps.cache-vendor.outputs.cache-hit != 'true' # Skip if cache hit
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - name: Cache Rector
+        uses: actions/cache@v3
+        with:
+          path: ./storage/rector/cache
+          key: ${{ runner.os }}-rector-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-rector-
+      - name: "Run Rector"
+        run: vendor/bin/rector --ansi
+      - name: Cache Pint
+        uses: actions/cache@v3
+        with:
+          path: ./storage/pint.cache
+          key: ${{ runner.os }}-pint-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-pint-
+      - name: "Run Pint"
+        run: ./vendor/bin/pint
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: '[ci-review] Rector & Pint'
+          commit_author: 'GitHub Action <actions@github.com>'
+          commit_user_email: 'action@github.com'
+
+  tests:
+    runs-on: ubuntu-latest
+    needs: code-quality
+    services:
+      mysql:
+        image: mysql:8.0.25
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: false
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: my_app_test
+        ports:
+          - 3306/tcp
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: shivammathur/setup-php@2.23.0
+        with:
+          php-version: '8.1'
+          extensions: mbstring, dom, fileinfo, mysql
+      - uses: actions/checkout@v3
+        with:
+          # Must be used to trigger workflow after push
+          token: ${{ secrets.ACCESS_TOKEN }}
+      - name: Copy .env
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+      - name: Cache Vendor
+        id: cache-vendor
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-vendor-${{ hashFiles('**/composer.lock') }}
+      - name: Install Dependencies
+        if: steps.cache-vendor.outputs.cache-hit != 'true' # Skip if cache hit
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - name: Generate key
+        run: php artisan key:generate
+      - name: PHPUnit
+        run: php artisan test --parallel
+        env:
+          DB_TEST_PORT: ${{ job.services.mysql.ports['3306'] }}
